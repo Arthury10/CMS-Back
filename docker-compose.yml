@@ -1,0 +1,43 @@
+services:
+  cms_service:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${CMS_BACK_PORT}:${CMS_BACK_PORT}
+    depends_on:
+      - cms_postgres
+    restart: always
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      CMS_BACK_PORT: ${CMS_BACK_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_NAME: ${POSTGRES_NAME}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - cms-connect
+  cms_postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_NAME}
+      PG_DATA: /var/lib/postgresql/data
+    volumes:
+      - api_db_data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+      - cms-connect
+volumes:
+  api_db_data:
+networks:
+  cms-connect:
+    driver: bridge

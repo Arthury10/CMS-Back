@@ -1,0 +1,114 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input BlockField {
+  fields: [FieldsInputs!]!
+  label: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum FieldInputType {
+  ARRAY
+  BLOCKS
+  CHECKBOX
+  COLOR
+  DATE
+  EMAIL
+  FILE
+  GROUP
+  NUMBER
+  PASSWORD
+  RADIO
+  RELATIONSHIP
+  RICHTEXT
+  SELECT
+  TABS
+  TEXT
+  TEXTAREA
+}
+
+input FieldsInputs {
+  blocks: [BlockField!]
+  defaultValue: String
+  fields: [FieldsInputs!]
+  hidden: Boolean
+  label: String
+  max: Int
+  min: Int
+  name: String
+  options: [SelectOption!]
+  position: String
+  readOnly: Boolean
+  relationship: RelationshipField
+  required: Boolean
+  step: Float
+  tabs: [TabField!]
+  type: FieldInputType!
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type Mutation {
+  createOrUpdateModel(fields: [FieldsInputs!]!, modelName: String!): Boolean!
+  createProduto(createProdutoInput: ProdutoInputDTO!): ProdutoDTO!
+}
+
+type ProdutoDTO {
+  description: String
+  name: String
+  publishAt: DateTime
+  tabs: [TabsdtoType!]
+}
+
+input ProdutoInputDTO {
+  description: String
+  name: String
+  publishAt: DateTime
+  tabs: [TabsinputType!]
+}
+
+type Query {
+  getCollection(collectionName: String!): [JSONObject!]!
+  produtos: [ProdutoDTO!]!
+}
+
+input RelationshipField {
+  hasMany: Boolean
+  relationTo: String!
+}
+
+input SelectOption {
+  label: String!
+  value: String!
+}
+
+input TabField {
+  fields: [FieldsInputs!]!
+  label: String!
+}
+
+type TabsdtoFieldsType {
+  valor: String
+}
+
+type TabsdtoType {
+  fields: [TabsdtoFieldsType!]
+  label: String
+}
+
+input TabsinputFieldsType {
+  valor: String
+}
+
+input TabsinputType {
+  fields: [TabsinputFieldsType!]
+  label: String
+}
