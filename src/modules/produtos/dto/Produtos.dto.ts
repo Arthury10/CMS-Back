@@ -6,30 +6,29 @@
 
 
         @ObjectType()
-        class TabsdtoFieldsType {
+        class ProdutosTabsdtoFieldsType {
          @Field({nullable: true})
   valor: string;
         }
 
-
         @ObjectType()
-        class TabsdtoType {
+        class ProdutosTabsdtoType {
           @Field({ nullable: true })
   label: string; 
- @Field(() => [TabsdtoFieldsType], { nullable: true })
- fields?: TabsdtoFieldsType[]
+ @Field(() => [ProdutosTabsdtoFieldsType], { nullable: true })
+ fields?: ProdutosTabsdtoFieldsType[]
           }
         
 
     @ObjectType()
-    export class ProdutoDTO {
+    export class ProdutosDTO {
         @Field({nullable: true})
   name: string;
   @Field({nullable: true})
   description: string;
   @Field({nullable: true})
   publishAt: Date;
-  @Field(() => [TabsdtoType], {nullable: true})
-  tabs?: TabsdtoType[];
+  @Field(() => [ProdutosTabsdtoType], {nullable: true})
+  tabs?: ProdutosTabsdtoType[];
     }
     

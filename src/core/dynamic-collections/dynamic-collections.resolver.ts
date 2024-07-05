@@ -27,7 +27,7 @@ export class DynamicCollectionsResolver {
     return true
   }
 
-  @Query(() => [GraphQLJSONObject])
+  @Query(() => GraphQLJSONObject)
   async getCollection(
     @Args('collectionName') collectionName: string
   ): Promise<string> {

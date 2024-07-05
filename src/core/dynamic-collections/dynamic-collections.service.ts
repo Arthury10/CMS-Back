@@ -90,12 +90,15 @@ export class DynamicCollectionsService {
   }
 
   async generateCollectionsFile(modelName: string, fields: FieldsInputs[]) {
-    const content = `\nexport const ${modelName} = ${JSON.stringify(fields, null, 2)};`
+    const content = `\nexport const ${modelName} = {
+      slug: '${modelName}',
+      fields: ${JSON.stringify(fields, null, 2)}
+    };`
 
     const srcDir = join(
       process.cwd(),
       'src',
-      'modules',
+      'core',
       'dynamic-collections',
       'collections'
     )
@@ -131,7 +134,11 @@ export class DynamicCollectionsService {
       const content = await fs.readFile(srcDir, 'utf-8')
       const removedExport = content.replace(`export const ${modelName} = `, '')
 
-      const script = new vm.Script(removedExport)
+      console.log(removedExport)
+
+      const wrappedContent = `(${removedExport})`
+
+      const script = new vm.Script(wrappedContent)
       const context = vm.createContext({})
       const result = script.runInContext(context)
       return result

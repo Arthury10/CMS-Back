@@ -6,30 +6,29 @@
 
 
         @InputType()
-        class TabsinputFieldsType {
+        class TesteTabsinputFieldsType {
          @Field({nullable: true})
   valor: string;
         }
 
-
         @InputType()
-        class TabsinputType {
+        class TesteTabsinputType {
           @Field({ nullable: true })
   label: string; 
- @Field(() => [TabsinputFieldsType], { nullable: true })
- fields?: TabsinputFieldsType[]
+ @Field(() => [TesteTabsinputFieldsType], { nullable: true })
+ fields?: TesteTabsinputFieldsType[]
           }
         
 
     @InputType()
-    export class ProdutoInputDTO {
+    export class TesteInputDTO {
         @Field({nullable: true})
   name: string;
   @Field({nullable: true})
   description: string;
   @Field({nullable: true})
   publishAt: Date;
-  @Field(() => [TabsinputType], {nullable: true})
-  tabs?: TabsinputType[];
+  @Field(() => [TesteTabsinputType], {nullable: true})
+  tabs?: TesteTabsinputType[];
     }
     

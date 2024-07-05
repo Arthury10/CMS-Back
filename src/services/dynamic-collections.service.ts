@@ -1,12 +1,60 @@
 import { Injectable } from '@nestjs/common'
 
+import { execSync } from 'child_process'
+import * as chokidar from 'chokidar'
 import * as fs from 'fs-extra'
 import { join } from 'path'
-import { FieldsInputs } from 'src/core/dynamic-collections/dtos/fields.dto'
 
 @Injectable()
-export class DynamicModulesService {
-  async createModule(modelName: string, fields: any[]) {
+export class DynamicCollectionsService {
+  constructor() {
+    this.watchFieldDefinitions()
+  }
+
+  async watchFieldDefinitions() {
+    const collectionsDir = join(process.cwd(), 'src', 'collections')
+    const watcher = chokidar.watch(`${collectionsDir}/*.ts`, {
+      persistent: true
+    })
+
+    watcher
+      .on('add', path => this.handleFileChange(path))
+      .on('change', path => this.handleFileChange(path))
+      .on('unlink', path => this.handleFileDeletion(path))
+  }
+
+  async handleFileChange(filePath: string) {
+    try {
+      const module = this.loadTsFile(filePath)
+      const key = Object.keys(module)[0]
+      const { slug: modelName, fields } = module[key]
+      console.log(`Creating or updating module ${modelName}`)
+      console.log(fields)
+      await this.createOrUpdateModule(modelName, fields)
+    } catch (error) {
+      console.error(`Failed to handle file change: ${error.message}`)
+    }
+  }
+
+  async handleFileDeletion(filePath: string) {
+    try {
+      const module = this.loadTsFile(filePath)
+      const { slug: modelName } = module
+      await this.deleteModule(modelName)
+    } catch (error) {
+      console.error(`Failed to handle file deletion: ${error.message}`)
+    }
+  }
+
+  loadTsFile(filePath: string): any {
+    const result = execSync(
+      `ts-node -e "console.log(JSON.stringify(require('${filePath.replace(/\\/g, '\\\\')}')))"`
+    )
+    return JSON.parse(result.toString())
+  }
+
+  async createOrUpdateModule(modelName: string, fields: any[]) {
+    console.log(`Creating or updating module ${modelName}`)
     const srcDir = join(
       process.cwd(),
       'src',
@@ -24,16 +72,11 @@ export class DynamicModulesService {
     const entityContent = this.generateEntityContent(modelName, fields)
     const serviceContent = this.generateServiceContent(modelName)
 
-    // Write files
-
-    //entity
     await fs.writeFile(
       join(srcDir, 'entity', `${modelName}.entity.ts`),
       entityContent,
       { mode: 0o664 }
     )
-
-    //dto
     await fs.writeFile(join(srcDir, 'dto', `${modelName}.dto.ts`), dtoContent, {
       mode: 0o664
     })
@@ -42,26 +85,18 @@ export class DynamicModulesService {
       this.generateInputDtoContent(modelName, fields),
       { mode: 0o664 }
     )
-
-    //module
     await fs.writeFile(join(srcDir, `${modelName}.module.ts`), moduleContent, {
       mode: 0o664
     })
-
-    //resolver
     await fs.writeFile(
       join(srcDir, `${modelName}.resolver.ts`),
       resolverContent,
       { mode: 0o664 }
     )
-
-    //service
     await fs.writeFile(
       join(srcDir, `${modelName}.service.ts`),
       serviceContent,
-      {
-        mode: 0o664
-      }
+      { mode: 0o664 }
     )
 
     await this.updateDynamicModulesFile(modelName)
@@ -137,13 +172,13 @@ export class DynamicModulesService {
 
   private generateDtoContent(modelName: string, fields: any[]): string {
     const fieldsString = fields
-      .map(field => `  ${this.generateDtoField(modelName, field, 'dto')}`)
+      .map(field => `  ${this.generateDtoField(field, 'dto')}`)
       .join('\n')
 
     return `
     import { ObjectType, Field } from '@nestjs/graphql';
 
-    ${this.generateSubDtoField(modelName, fields, 'dto')}
+    ${this.generateSubDtoField(fields, 'dto')}
 
     @ObjectType()
     export class ${modelName}DTO {
@@ -154,13 +189,13 @@ export class DynamicModulesService {
 
   private generateInputDtoContent(modelName: string, fields: any[]): string {
     const fieldsString = fields
-      .map(field => `  ${this.generateDtoField(modelName, field, 'input')}`)
+      .map(field => `  ${this.generateDtoField(field, 'input')}`)
       .join('\n')
 
     return `
     import { InputType, Field } from '@nestjs/graphql';
 
-    ${this.generateSubDtoField(modelName, fields, 'input')}
+    ${this.generateSubDtoField(fields, 'input')}
 
     @InputType()
     export class ${modelName}InputDTO {
@@ -187,11 +222,7 @@ export class DynamicModulesService {
     `
   }
 
-  private generateDtoField = (
-    modelName: string,
-    field: FieldsInputs,
-    type: 'input' | 'dto'
-  ) => {
+  private generateDtoField = (field: any, type: 'input' | 'dto') => {
     const isNullable = field?.required ? '' : 'nullable: true'
 
     switch (field?.type) {
@@ -202,28 +233,24 @@ export class DynamicModulesService {
       case 'date':
         return `@Field({${isNullable}})\n  ${field.name}: Date;`
       case 'tabs':
-        return `@Field(() => [${modelName}Tabs${type}Type], {nullable: true})\n  tabs?: ${modelName}Tabs${type}Type[];`
+        return `@Field(() => [Tabs${type}Type], {nullable: true})\n  tabs?: Tabs${type}Type[];`
       default:
         return `@Field({${isNullable}})\n  ${field.name}: string;`
     }
   }
 
-  private generateSubDtoField = (
-    modelName: string,
-    fields: FieldsInputs[],
-    type: 'input' | 'dto'
-  ) => {
+  private generateSubDtoField = (fields: any[], type: 'input' | 'dto') => {
     const decorator = type === 'input' ? '@InputType()' : '@ObjectType()'
 
     const subDtosString = fields?.map(field => {
       if (field?.type === 'tabs') {
         return `
         ${decorator}
-        class ${modelName}Tabs${type}FieldsType {
+        class Tabs${type}FieldsType {
          ${field.tabs
            .map(subField => {
              return subField?.fields?.map(subSubField => {
-               return `${this.generateDtoField(modelName, subSubField, type)}`
+               return `${this.generateDtoField(subSubField, type)}`
              })
            })
            .flat()
@@ -231,12 +258,12 @@ export class DynamicModulesService {
         }
 
         ${decorator}
-        class ${modelName}Tabs${type}Type {
+        class Tabs${type}Type {
           ${field.tabs
             .map(
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               _ =>
-                `@Field({ nullable: true })\n  label: string; \n @Field(() => [${modelName}Tabs${type}FieldsType], { nullable: true })\n fields?: ${modelName}Tabs${type}FieldsType[]`
+                `@Field({ nullable: true })\n  label: string; \n @Field(() => [Tabs${type}FieldsType], { nullable: true })\n fields?: Tabs${type}FieldsType[]`
             )
             .join('\n')}
           }
@@ -247,7 +274,7 @@ export class DynamicModulesService {
     return subDtosString.join('\n')
   }
 
-  private generateEntityColumn = (field: FieldsInputs) => {
+  private generateEntityColumn = (field: any) => {
     const isNullable = field?.required ? '' : 'nullable: true'
 
     switch (field?.type) {
@@ -275,7 +302,7 @@ export class DynamicModulesService {
         throw error
       }
       dynamicModulesContent = `
-import { ${modelName}Module } from './modules/${modelName.toLowerCase()}/${modelName}.module';
+import { ${modelName}Module } from './modules/${modelName}/${modelName}.module';
 
 export const dynamicModules = [
   ${modelName}Module,
@@ -296,6 +323,44 @@ export const dynamicModules = [
         .replace(/(import .+;(\r?\n)*)*(\r?\n)*/, `$&${importStatement}\n`)
 
       await fs.writeFile(dynamicModulesFile, updatedContent, { mode: 0o664 })
+    }
+  }
+
+  async deleteModule(modelName: string) {
+    const srcDir = join(
+      process.cwd(),
+      'src',
+      'modules',
+      modelName.toLowerCase()
+    )
+    const distDir = join(
+      process.cwd(),
+      'dist',
+      'modules',
+      modelName.toLowerCase()
+    )
+
+    await fs.remove(srcDir)
+    await fs.remove(distDir)
+
+    await this.removeModuleFromDynamicModulesFile(modelName)
+  }
+
+  private async removeModuleFromDynamicModulesFile(modelName: string) {
+    const dynamicModulesFile = join(process.cwd(), 'src', 'dynamic-modules.ts')
+    let dynamicModulesContent = await fs.readFile(dynamicModulesFile, 'utf-8')
+
+    const importStatement = `import { ${modelName}Module } from './modules/${modelName.toLowerCase()}/${modelName}.module';`
+    const moduleEntry = `  ${modelName}Module,`
+
+    if (dynamicModulesContent.includes(importStatement)) {
+      dynamicModulesContent = dynamicModulesContent
+        .replace(importStatement, '')
+        .replace(moduleEntry, '')
+
+      await fs.writeFile(dynamicModulesFile, dynamicModulesContent, {
+        mode: 0o664
+      })
     }
   }
 }
