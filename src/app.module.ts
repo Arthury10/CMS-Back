@@ -6,8 +6,8 @@ import { AppService } from './app.service'
 import GraphQLModuleConfig from './config/graphql'
 import TypeOrmModuleConfig from './config/typeorm'
 import { DynamicCollectionsModule } from './core/dynamic-collections/dynamic-collections.module'
-import { dynamicModules } from './dynamic-modules'
-import { DynamicModulesService } from './services/dynamic-modules.service'
+import { DynamicModulesModule } from './core/dynamic-modules/dynamic-modules.module'
+import { DynamicModules } from './dynamic-modules'
 
 @Module({
   imports: [
@@ -15,9 +15,10 @@ import { DynamicModulesService } from './services/dynamic-modules.service'
     TypeOrmModuleConfig,
     GraphQLModuleConfig,
     DynamicCollectionsModule,
-    ...dynamicModules
+    DynamicModulesModule,
+    ...DynamicModules
   ],
   controllers: [AppController],
-  providers: [AppService, DynamicModulesService]
+  providers: [AppService]
 })
 export class AppModule {}

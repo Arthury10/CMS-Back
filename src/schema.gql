@@ -2,47 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type ArthurDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [ArthurTabsdtoType!]
-}
-
-input ArthurInputDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [ArthurTabsinputType!]
-}
-
-type ArthurTabsdtoFieldsType {
-  valor: String
-}
-
-type ArthurTabsdtoType {
-  fields: [ArthurTabsdtoFieldsType!]
-  label: String
-}
-
-input ArthurTabsinputFieldsType {
-  valor: String
-}
-
-input ArthurTabsinputType {
-  fields: [ArthurTabsinputFieldsType!]
-  label: String
-}
-
 input BlockField {
   fields: [FieldsInputs!]!
   label: String!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 enum FieldInputType {
   ARRAY
@@ -89,49 +52,11 @@ The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](
 scalar JSONObject
 
 type Mutation {
-  createArthur(createArthurInput: ArthurInputDTO!): ArthurDTO!
   createOrUpdateModel(fields: [FieldsInputs!]!, modelName: String!): Boolean!
-  createProdutos(createProdutosInput: ProdutosInputDTO!): ProdutosDTO!
-  createTeste(createTesteInput: TesteInputDTO!): TesteDTO!
-}
-
-type ProdutosDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [ProdutosTabsdtoType!]
-}
-
-input ProdutosInputDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [ProdutosTabsinputType!]
-}
-
-type ProdutosTabsdtoFieldsType {
-  valor: String
-}
-
-type ProdutosTabsdtoType {
-  fields: [ProdutosTabsdtoFieldsType!]
-  label: String
-}
-
-input ProdutosTabsinputFieldsType {
-  valor: String
-}
-
-input ProdutosTabsinputType {
-  fields: [ProdutosTabsinputFieldsType!]
-  label: String
 }
 
 type Query {
-  arthurs: [ArthurDTO!]!
   getCollection(collectionName: String!): JSONObject!
-  produtoss: [ProdutosDTO!]!
-  testes: [TesteDTO!]!
 }
 
 input RelationshipField {
@@ -147,36 +72,4 @@ input SelectOption {
 input TabField {
   fields: [FieldsInputs!]!
   label: String!
-}
-
-type TesteDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [TesteTabsdtoType!]
-}
-
-input TesteInputDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-  tabs: [TesteTabsinputType!]
-}
-
-type TesteTabsdtoFieldsType {
-  valor: String
-}
-
-type TesteTabsdtoType {
-  fields: [TesteTabsdtoFieldsType!]
-  label: String
-}
-
-input TesteTabsinputFieldsType {
-  valor: String
-}
-
-input TesteTabsinputType {
-  fields: [TesteTabsinputFieldsType!]
-  label: String
 }

@@ -1,17 +1,12 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 
 import { DynamicCollectionsResolver } from './dynamic-collections.resolver'
 import { DynamicCollectionsService } from './dynamic-collections.service'
 
-import { DynamicModulesService } from 'src/services/dynamic-modules.service'
-
+@Global()
 @Module({
   imports: [],
-  providers: [
-    DynamicCollectionsResolver,
-    DynamicCollectionsService,
-    DynamicModulesService
-  ],
+  providers: [DynamicCollectionsResolver, DynamicCollectionsService],
   exports: [DynamicCollectionsResolver, DynamicCollectionsService]
 })
 export class DynamicCollectionsModule {}
