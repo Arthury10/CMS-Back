@@ -6,7 +6,6 @@ import { FieldsInputs } from './dtos/fields.dto'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import { EntityManager, QueryRunner } from 'typeorm'
-import * as vm from 'vm'
 
 @Injectable()
 export class DynamicCollectionsService {
@@ -120,28 +119,23 @@ export class DynamicCollectionsService {
     }
   }
 
-  async getCollection(modelName: string) {
+  async getCollections(modelName?: string) {
     const srcDir = join(
       process.cwd(),
       'src',
       'core',
       'dynamic-collections',
       'collections',
-      `${modelName}.ts`
+      `cache.json`
     )
 
     try {
       const content = await fs.readFile(srcDir, 'utf-8')
-      const removedExport = content.replace(`export const ${modelName} = `, '')
+      const collections = JSON.parse(content).filter(
+        collection => collection.modelName === modelName
+      )
 
-      console.log(removedExport)
-
-      const wrappedContent = `(${removedExport})`
-
-      const script = new vm.Script(wrappedContent)
-      const context = vm.createContext({})
-      const result = script.runInContext(context)
-      return result
+      return collections
     } catch (error) {
       console.error(`Error reading file: ${error}`)
       throw new Error(`Failed to read collections file: ${error.message}`)

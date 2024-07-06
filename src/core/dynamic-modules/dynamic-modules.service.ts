@@ -10,6 +10,8 @@ import * as chokidar from 'chokidar'
 import * as fs from 'fs-extra'
 import { join } from 'path'
 import { FieldsInputs } from 'src/core/dynamic-collections/dtos/fields.dto'
+import formatSlug from 'src/utilities/formatSlug'
+import { pluralize } from 'src/utilities/pluralize'
 
 @Injectable()
 export class DynamicModulesService implements OnModuleInit {
@@ -75,7 +77,55 @@ export class DynamicModulesService implements OnModuleInit {
     await this.resolverGenerator.generate(modelName, srcDir)
     await this.serviceGenerator.generate(modelName, srcDir)
 
-    const fieldsContent = JSON.stringify({ modelName, fields }, null, 2)
+    const methods = [
+      'findMany',
+      'findOne',
+      'createOne',
+      'updateOne',
+      'removeOne'
+    ].map(item => {
+      switch (item) {
+        case 'findMany':
+          return {
+            name: `${item}${pluralize(modelName)}`,
+            args: [],
+            fields: fields.map(field => field.name)
+          }
+        case 'findOne':
+          return {
+            name: `${item}${modelName}`,
+            args: ['id: number!'],
+            fields: fields.map(field => field.name)
+          }
+        case 'createOne':
+          return {
+            name: `${item}${modelName}`,
+            args: [`create${modelName}Input: ${modelName}InputDTO!`],
+            fields: fields.map(field => field.name)
+          }
+        case 'updateOne':
+          return {
+            name: `${item}${modelName}`,
+            args: [`update${modelName}Input: ${modelName}InputDTO!`],
+            fields: fields.map(field => field.name)
+          }
+        case 'removeOne':
+          return {
+            name: `${item}${modelName}`,
+            args: ['id: number!'],
+            fields: fields.map(field => field.name)
+          }
+        default: {
+          throw new Error(`Unsupported method: ${item}`)
+        }
+      }
+    })
+
+    const fieldsContent = JSON.stringify(
+      { modelName, slug: formatSlug(modelName), methods, fields },
+      null,
+      2
+    )
     await fs.writeFile(
       join(srcDir, 'generated', 'fields.json'),
       fieldsContent,

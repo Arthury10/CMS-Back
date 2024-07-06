@@ -23,10 +23,10 @@ export class DynamicCollectionsResolver {
     return true
   }
 
-  @Query(() => GraphQLJSONObject)
+  @Query(() => [GraphQLJSONObject])
   async getCollection(
-    @Args('collectionName') collectionName: string
+    @Args('modelName', { nullable: true }) modelName: string
   ): Promise<string> {
-    return await this.dynamicCollectionsService.getCollection(collectionName)
+    return await this.dynamicCollectionsService.getCollections(modelName)
   }
 }

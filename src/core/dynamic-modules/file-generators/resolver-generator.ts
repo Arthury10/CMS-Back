@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import * as fs from 'fs-extra'
 import { join } from 'path'
+import { pluralize } from 'src/utilities/pluralize'
 
 @Injectable()
 export class ResolverGenerator {
@@ -27,13 +28,35 @@ export class ResolverGenerator {
       constructor(private readonly ${modelName.toLowerCase()}Service: ${modelName}Service) {}
 
       @Query(() => [${modelName}DTO])
-      async ${modelName.toLowerCase()}s() {
-        return this.${modelName.toLowerCase()}Service.findAll();
+      async findMany${pluralize(modelName)}() {
+        return this.${modelName.toLowerCase()}Service.findMany()
+      }
+    
+      @Query(() => [${modelName}DTO])
+      async findOne${modelName}(
+        @Args('id') id: number
+      ) {
+        return this.${modelName.toLowerCase()}Service.findOne(id)
+      }  
+
+      @Mutation(() => ${modelName}DTO)
+      async createOne${modelName}(@Args('create${modelName}Input') create${modelName}Input: ${modelName}InputDTO) {
+        return this.${modelName.toLowerCase()}Service.createOne(create${modelName}Input)
       }
 
       @Mutation(() => ${modelName}DTO)
-      async create${modelName}(@Args('create${modelName}Input') create${modelName}Input: ${modelName}InputDTO) {
-        return this.${modelName.toLowerCase()}Service.create(create${modelName}Input);
+      async updateOne${modelName}(
+        @Args('id') id: number,
+        @Args('update${modelName}Input') update${modelName}Input: ${modelName}InputDTO
+        ) {
+        return this.${modelName.toLowerCase()}Service.updateOne(id, update${modelName}Input)
+      }
+
+      @Mutation(() => ${modelName}DTO)
+      async removeOne${modelName}(
+        @Args('id') id: number,
+        ) {
+        return this.${modelName.toLowerCase()}Service.removeOne(id)
       }
     }
     `

@@ -31,14 +31,29 @@ export class ServiceGenerator {
         private ${modelName.toLowerCase()}Repository: Repository<${modelName}>
       ) {}
 
-       async create(create${modelName}Input: ${modelName}InputDTO): Promise<${modelName}DTO> {
-         const ${modelName.toLowerCase()} = this.${modelName.toLowerCase()}Repository.create(create${modelName}Input);
-         return this.${modelName.toLowerCase()}Repository.save(${modelName.toLowerCase()});
-       }
-
-      async findAll(): Promise<${modelName}[]> {
-        return this.${modelName.toLowerCase()}Repository.find();
+      async findMany(): Promise<${modelName}[]> {
+        return await this.${modelName.toLowerCase()}Repository.find();
       }
+
+      async findOne(id: number): Promise<${modelName}> {
+        return await this.${modelName.toLowerCase()}Repository.findOne({where: {id}});
+      }
+
+      async createOne(create${modelName}Input: ${modelName}InputDTO): Promise<${modelName}DTO> {
+        const ${modelName.toLowerCase()} = this.${modelName.toLowerCase()}Repository.create(create${modelName}Input)
+        return await this.${modelName.toLowerCase()}Repository.save(${modelName.toLowerCase()})
+      }
+      
+      async updateOne(id:number, update${modelName}Input: ${modelName}InputDTO): Promise<${modelName}DTO> {
+        const ${modelName.toLowerCase()} =  await this.${modelName.toLowerCase()}Repository.update(id, update${modelName}Input)
+        return this.findOne(id)
+      }
+
+      async removeOne(id:number): Promise<${modelName}DTO> {
+        const ${modelName.toLowerCase()} = await this.findOne(id)
+        await this.${modelName.toLowerCase()}Repository.delete(id)
+        return ${modelName.toLowerCase()}
+      }  
   }
     `
   }
