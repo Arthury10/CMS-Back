@@ -47,7 +47,6 @@ input FieldsInputs {
   relationship: RelationshipField
   required: Boolean
   step: Float
-  tabs: [TabField!]
   type: FieldInputType!
 }
 
@@ -56,28 +55,28 @@ The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](
 """
 scalar JSONObject
 
+type LucasDTO {
+  description: String
+  name: String
+  publishAt: DateTime
+}
+
+input LucasInputDTO {
+  description: String
+  name: String
+  publishAt: DateTime
+}
+
 type Mutation {
-  createOnePage(createPageInput: PageInputDTO!): PageDTO!
+  createOneLucas(createLucasInput: LucasInputDTO!): LucasDTO!
   createOrUpdateModel(fields: [FieldsInputs!]!, modelName: String!): Boolean!
-  removeOnePage(id: Float!): PageDTO!
-  updateOnePage(id: Float!, updatePageInput: PageInputDTO!): PageDTO!
-}
-
-type PageDTO {
-  description: String
-  name: String
-  publishAt: DateTime
-}
-
-input PageInputDTO {
-  description: String
-  name: String
-  publishAt: DateTime
+  removeOneLucas(id: Float!): LucasDTO!
+  updateOneLucas(id: Float!, updateLucasInput: LucasInputDTO!): LucasDTO!
 }
 
 type Query {
-  findManyPages: [PageDTO!]!
-  findOnePage(id: Float!): [PageDTO!]!
+  findManyLucases: [LucasDTO!]!
+  findOneLucas(id: Float!): [LucasDTO!]!
   getCollection(modelName: String): [JSONObject!]!
 }
 
@@ -89,9 +88,4 @@ input RelationshipField {
 input SelectOption {
   label: String!
   value: String!
-}
-
-input TabField {
-  fields: [FieldsInputs!]!
-  label: String!
 }

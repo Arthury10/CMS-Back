@@ -8,8 +8,10 @@ RUN npm install
 
 COPY . .
 
-# Ensure the correct permissions
 RUN chown -R node:node /usr/src/app
+
+RUN chown -R node:node /usr/local/lib/node_modules
+
 USER node
 
 CMD [ "npm", "run", "start:dev" ]

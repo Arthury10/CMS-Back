@@ -1,2 +1,3 @@
-import { PageModule } from './modules/page/page.module'
-export const DynamicModules = [PageModule]
+import { LucasModule } from './modules/lucas/lucas.module';
+export const DynamicModules = [
+  LucasModule,]

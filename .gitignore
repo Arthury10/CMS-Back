@@ -28,3 +28,4 @@ lerna-debug.log*
 *.sublime-workspace
 
 .env
+lib_test_arthur_CMS
